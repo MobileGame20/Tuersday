@@ -21,16 +21,18 @@ jobs:
       - name: Copy notebook to droplet
         run: |
           echo 'Transferring notebook to droplet...'
-          scp -o StrictHostKeyChecking=no example.ipynb ${{ secrets.DROPLET_USER }}@${{ secrets.DROPLET_IP }}:~/example.ipynb
+          scp -o StrictHostKeyChecking=no example.ipynb \
+              ${{ secrets.DROPLET_USER }}@${{ secrets.DROPLET_IP }}:~/example.ipynb
 
       - name: Launch Jupyter Notebook
         run: |
           echo 'Connecting to droplet and launching Jupyter...'
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DROPLET_USER }}@${{ secrets.IP }} << 'EOF'
+          ssh -T -o StrictHostKeyChecking=no ${{ secrets.DROPLET_USER }}@${{ secrets.DROPLET_IP }} << 'EOF'
             pip3 install --user --upgrade pip
             pip3 install --user notebook pandas numpy matplotlib
             pkill -f "jupyter-notebook" || true
-            nohup ~/.local/bin/jupyter-notebook \
+            export PATH=$HOME/.local/bin:$PATH
+            nohup jupyter-notebook \
               --ip=0.0.0.0 \
               --port=2323 \
               --no-browser \
